@@ -1,0 +1,4 @@
+
+A simple extension to allow Flask applications to use Mako templating.
+
+For examples see the tests/ directory.
