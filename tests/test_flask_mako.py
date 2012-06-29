@@ -42,3 +42,18 @@ class MakoTemplateTest(unittest.TestCase):
             self.assertTrue('testing' in result)
             self.assertTrue('123' in result)
 
+    def test_multiple_dirs(self):
+        """ Tests template loading from multiple directories. """
+        alt_d = os.path.join(self.root, 'alt_templates')
+        os.mkdir(alt_d)
+        with open(os.path.join(alt_d, 'alt'), 'w') as f:
+            f.write("${alt}")
+
+        td = self.app.config['MAKO_TEMPLATE_DIR']
+        self.app.config.update(MAKO_TEMPLATE_DIR=[alt_d, td])
+        self.mako = MakoTemplates(self.app)
+
+        with self.app.test_request_context():
+            result = self.mako.render('alt', alt='testing')
+            self.assertTrue('testing' in result)
+
