@@ -16,13 +16,14 @@ setup(
     author_email='fpmurphy@mtu.edu',
     description='Adds Mako templating support to Flask',
     long_description=__doc__,
-    py_modules=['flask_mako'],
+    py_modules=['flask_mako', 'test_flask_mako'],
     zip_safe=False,
     include_package_data=True,
     platforms='any',
     install_requires=[
-        'Flask'
+        'Flask', 'mako'
     ],
+    test_suite='test_flask_mako.suite',
     classifiers=[
         'Environment :: Web Environment',
         'Intended Audience :: Developers',

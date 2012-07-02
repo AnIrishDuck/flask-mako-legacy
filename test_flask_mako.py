@@ -113,3 +113,8 @@ class MakoTemplateTest(unittest.TestCase):
             self.assertTrue('error_template' in e.text)
             self.assertTrue('line 3' in e.text)
 
+
+def suite():
+    suite = unittest.TestSuite()
+    suite.addTest(unittest.makeSuite(MakoTemplateTest))
+    return suite
