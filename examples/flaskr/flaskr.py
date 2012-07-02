@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-    Flaskr
-    ~~~~~~
+    Mako Flaskr
+    ~~~~~~~~~~~
 
-    A microblog example application written as Flask tutorial with
-    Flask and sqlite3.
+    A microblog example application. Originally written as Flask tutorial with
+    Flask and sqlite3. Modified to demonstrate useage of the flask-mako
+    extension.
 
     :copyright: (c) 2010 by Armin Ronacher.
     :license: BSD, see LICENSE for more details.
@@ -15,6 +16,8 @@ from contextlib import closing
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
 
+from flask.ext.mako import MakoTemplates
+
 # configuration
 DATABASE = '/tmp/flaskr.db'
 DEBUG = True
@@ -22,11 +25,13 @@ SECRET_KEY = 'development key'
 USERNAME = 'admin'
 PASSWORD = 'default'
 
+MAKO_TEMPLATE_DIR = 'templates'
+
 # create our little application :)
 app = Flask(__name__)
 app.config.from_object(__name__)
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
-
+mako = MakoTemplates(app)
 
 def connect_db():
     """Returns a new connection to the database."""
@@ -58,7 +63,7 @@ def teardown_request(exception):
 def show_entries():
     cur = g.db.execute('select title, text from entries order by id desc')
     entries = [dict(title=row[0], text=row[1]) for row in cur.fetchall()]
-    return render_template('show_entries.html', entries=entries)
+    return mako.render('show_entries.tpl', entries=entries)
 
 
 @app.route('/add', methods=['POST'])
@@ -84,7 +89,7 @@ def login():
             session['logged_in'] = True
             flash('You were logged in')
             return redirect(url_for('show_entries'))
-    return render_template('login.html', error=error)
+    return mako.render('login.tpl', error=error)
 
 
 @app.route('/logout')

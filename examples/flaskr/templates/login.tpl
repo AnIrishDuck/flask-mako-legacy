@@ -1,8 +1,9 @@
-{% extends "layout.html" %}
-{% block body %}
+<%inherit file="layout.tpl" />
   <h2>Login</h2>
-  {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
-  <form action="{{ url_for('login') }}" method=post>
+  % if error:
+    <p class=error><strong>Error:</strong> ${error}
+  % endif
+  <form action="${url_for('login')}" method=post>
     <dl>
       <dt>Username:
       <dd><input type=text name=username>
@@ -11,4 +12,3 @@
       <dd><input type=submit value=Login>
     </dl>
   </form>
-{% endblock %}
