@@ -10,7 +10,7 @@ basic = """
 
 error = """
 % for arg in arguments:
-    ${arg}
+    ${error}
 % endfor
 """
 
@@ -31,7 +31,7 @@ class MakoTemplateTest(unittest.TestCase):
         )
         self.mako = mako = MakoTemplates(app)
 
-        for name, template in (('basic', basic), ('error', error)):
+        for name, template in (('basic', basic), ('error_template', error)):
             with open(os.path.join(template_dir, name), 'w') as f:
                 f.write(template)
 
@@ -56,4 +56,17 @@ class MakoTemplateTest(unittest.TestCase):
         with self.app.test_request_context():
             result = self.mako.render('alt', alt='testing')
             self.assertTrue('testing' in result)
+
+    def test_error(self):
+        """ Tests that template errors are properly handled. """
+        from flask.ext.mako import TemplateError
+
+        with self.app.test_request_context():
+            with self.assertRaises(TemplateError) as error:
+                self.mako.render('error_template', arguments=['x'])
+
+            e = error.exception
+            self.assertTrue('error_template' in e.message)
+            self.assertTrue('error_template' in e.text)
+            self.assertTrue('line 3' in e.text)
 

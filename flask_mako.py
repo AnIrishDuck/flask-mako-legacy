@@ -8,6 +8,23 @@ except ImportError:
 
 from flask import request, session, get_flashed_messages, url_for, g
 from mako.lookup import TemplateLookup
+from mako.exceptions import RichTraceback, text_error_template
+
+class TemplateError(RuntimeError):
+    """
+    A template has thrown an error during rendering. The following properties
+    are provided by this exception:
+
+    * ``self.tb``: a ``RichTraceback`` object generated from the exception.
+    * ``self.text``: the exception information, generated with
+      ``mako.text_error_template``.
+
+    """
+    def __init__(self, template):
+        msg = "Error occurred while rendering template '{0}'".format(template)
+        super(TemplateError, self).__init__(msg)
+        self.tb = RichTraceback()
+        self.text = text_error_template().render()
 
 class MakoTemplates(object):
     """
@@ -41,14 +58,17 @@ class MakoTemplates(object):
                 ctx.mako_lookup = self.create_lookup()
             return ctx.mako_lookup
 
-    def render(self, template, **kwargs):
+    def render(self, template_name, **kwargs):
         """
         Render the given template with standard Flask parameters in addition to
         the specified template `kwargs`.
 
         """
-        template = self.lookup.get_template(template)
-        return template.render(g=g, request=request,
-                               get_flashed_messages=get_flashed_messages,
-                               session=session, url_for=url_for, **kwargs)
+        template = self.lookup.get_template(template_name)
+        try:
+            return template.render(g=g, request=request,
+                                   get_flashed_messages=get_flashed_messages,
+                                   session=session, url_for=url_for, **kwargs)
+        except:
+            raise TemplateError(template_name)
 
