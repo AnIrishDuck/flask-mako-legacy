@@ -9,7 +9,7 @@ from setuptools import setup
 
 setup(
     name='Flask-Mako',
-    version='1.0',
+    version='0.1',
     url='https://github.com/AnIrishDuck/flask-mako',
     license='MIT',
     author='Frank Murphy',
