@@ -20,7 +20,7 @@ class MakoTemplateTest(unittest.TestCase):
     def setUp(self):
         self.root = root = tempfile.mkdtemp()
 
-        template_dir = os.path.join(root, "templates")
+        self.template_dir = template_dir = os.path.join(root, "templates")
         os.mkdir(template_dir)
 
         self.app = app = Flask(__name__)
@@ -35,12 +35,36 @@ class MakoTemplateTest(unittest.TestCase):
             with open(os.path.join(template_dir, name), 'w') as f:
                 f.write(template)
 
+    def _add_template(self, name, text):
+        with open(os.path.join(self.template_dir, name), 'w') as f:
+            f.write(text)
+
     def test_basic_template(self):
         """ Tests that the application can render a template. """
         with self.app.test_request_context():
             result = self.mako.render('basic', arguments=['testing', '123'])
             self.assertTrue('testing' in result)
             self.assertTrue('123' in result)
+
+    def test_standard_variables(self):
+        """
+        Tests that the variables generally available to Flask Jinja
+        templates are also available to Mako templates.
+
+        """
+        self._add_template("vars", """
+        ${config['MAKO_TEMPLATE_DIR']}
+        ${request.args}
+        ${session.new}
+        ${url_for('test')}
+        ${get_flashed_messages()}
+        """)
+
+        @self.app.route('/test')
+        def test(): return "test"
+
+        with self.app.test_request_context():
+            result = self.mako.render("vars")
 
     def test_multiple_dirs(self):
         """ Tests template loading from multiple directories. """

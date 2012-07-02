@@ -67,9 +67,11 @@ class MakoTemplates(object):
         """
         template = self.lookup.get_template(template_name)
         try:
-            return template.render(g=g, request=request,
-                                   get_flashed_messages=get_flashed_messages,
-                                   session=session, url_for=url_for, **kwargs)
+            args = dict(g=g, request=request, session=session,
+                        config=self.app.config, url_for=url_for,
+                        get_flashed_messages=get_flashed_messages)
+            args.update(kwargs)
+            return template.render(**args)
         except:
             raise TemplateError(template_name)
 
