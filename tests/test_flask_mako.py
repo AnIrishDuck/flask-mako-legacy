@@ -58,10 +58,15 @@ class MakoTemplateTest(unittest.TestCase):
         ${session.new}
         ${url_for('test')}
         ${get_flashed_messages()}
+
+        ${injected()}
         """)
 
         @self.app.route('/test')
         def test(): return "test"
+
+        @self.app.context_processor
+        def inject(): return {"injected": lambda: "injected"}
 
         with self.app.test_request_context():
             result = self.mako.render("vars")
