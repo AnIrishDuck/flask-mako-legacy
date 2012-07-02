@@ -1,4 +1,6 @@
 import os, tempfile, unittest
+
+import flask
 from flask import Flask
 from flask.ext.mako import MakoTemplates
 
@@ -84,6 +86,10 @@ class MakoTemplateTest(unittest.TestCase):
             result = self.mako.render('basic', arguments=[])
 
         self.assertEqual(len(log), 1)
+
+    if not flask.signals_available:
+        test_signals = unittest.skip("To test signals, install the blinker "
+                                     "library")(test_signals)
 
     def test_multiple_dirs(self):
         """ Tests template loading from multiple directories. """
