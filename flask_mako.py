@@ -21,10 +21,11 @@ class TemplateError(RuntimeError):
 
     """
     def __init__(self, template):
-        msg = "Error occurred while rendering template '{0}'".format(template)
-        super(TemplateError, self).__init__(msg)
         self.tb = RichTraceback()
         self.text = text_error_template().render()
+        msg = "Error occurred while rendering template '{0}'".format(template)
+        msg += "\n" + self.text
+        super(TemplateError, self).__init__(msg)
 
 class MakoTemplates(object):
     """
