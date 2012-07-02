@@ -71,6 +71,20 @@ class MakoTemplateTest(unittest.TestCase):
         with self.app.test_request_context():
             result = self.mako.render("vars")
 
+    def test_signals(self):
+        """ Tests that template rendering fires the right signal. """
+        from flask.signals import template_rendered
+        log = []
+
+        def record(*args, **extra):
+            log.append(args)
+        template_rendered.connect(record, self.app)
+
+        with self.app.test_request_context():
+            result = self.mako.render('basic', arguments=[])
+
+        self.assertEqual(len(log), 1)
+
     def test_multiple_dirs(self):
         """ Tests template loading from multiple directories. """
         alt_d = os.path.join(self.root, 'alt_templates')

@@ -7,6 +7,7 @@ except ImportError:
     from flask import _request_ctx_stack as stack
 
 from flask import request, session, get_flashed_messages, url_for, g
+from flask.signals import template_rendered
 from mako.lookup import TemplateLookup
 from mako.exceptions import RichTraceback, text_error_template
 
@@ -71,7 +72,9 @@ class MakoTemplates(object):
                     'get_flashed_messages': get_flashed_messages}
             args.update(kwargs)
             self.app.update_template_context(args)
-            return template.render(**args)
+            rv = template.render(**args)
+            template_rendered.send(self.app, template=template, context=args)
+            return rv
         except:
             raise TemplateError(template_name)
 
