@@ -1,4 +1,22 @@
+A simple extension that integrates Mako template rendering into Flask
+applications. Usage::
 
-A simple extension to allow Flask applications to use Mako templating.
+    # Set the template directory. This can also be a list of directories.
+    app.config['MAKO_TEMPLATE_DIR'] = 'templates/'
+    # These parameters are optional.
+    app.config['MAKO_CACHE_DIR'] = 'cache/'
+    app.config['MAKO_CACHE_SIZE'] = 200
+    mako = MakoTemplates(app)
 
-For examples see the tests/ directory.
+    @app.route('/')
+    def index(): return mako.render("index.tpl", message="hello")
+
+The template rendering functionality is designed to be as similar to the
+built-in Jinja2 behavior as possible. Thus, the same parameters (``url_for``,
+``request``, ``context``, etc) will be set by default. Other features, such as
+custom ``context_processor`` hooks and the ``template_rendered`` signal, will
+also work.
+
+For more in-depth examples see the ``tests/`` and ``examples/`` directories.
+
+To run the bundled tests: ``python setup.py test``.
