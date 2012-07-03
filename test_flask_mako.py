@@ -2,7 +2,7 @@ import os, tempfile, unittest
 
 import flask
 from flask import Flask
-from flask.ext.mako import MakoTemplates
+from flask.ext.mako import MakoTemplates, TemplateError
 
 basic = """
 % for arg in arguments:
@@ -40,6 +40,21 @@ class MakoTemplateTest(unittest.TestCase):
     def _add_template(self, name, text):
         with open(os.path.join(self.template_dir, name), 'w') as f:
             f.write(text)
+
+    def test_encoding(self):
+        """ Tests that the application properly handles Unicode. """
+        utf = "\xC2\xA2"
+        self._add_template("unicode", utf)
+
+        with self.app.test_request_context():
+            self.assertEqual(utf, self.mako.render('unicode'))
+
+        with self.assertRaises(TemplateError):
+            app = self.app
+            app.config.update(MAKO_OUTPUT_ENCODING='ascii')
+            ascii_mako = MakoTemplates(app)
+            with self.app.test_request_context():
+                ascii_mako.render('unicode')
 
     def test_basic_template(self):
         """ Tests that the application can render a template. """
@@ -108,8 +123,6 @@ class MakoTemplateTest(unittest.TestCase):
 
     def test_error(self):
         """ Tests that template errors are properly handled. """
-        from flask.ext.mako import TemplateError
-
         with self.app.test_request_context():
             with self.assertRaises(TemplateError) as error:
                 self.mako.render('error_template', arguments=['x'])
