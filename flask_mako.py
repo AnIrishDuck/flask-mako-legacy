@@ -8,6 +8,7 @@ except ImportError:
 
 from flask import request, session, get_flashed_messages, url_for, g
 from flask.signals import template_rendered
+from flask.helpers import locked_cached_property
 from mako.lookup import TemplateLookup
 from mako.exceptions import RichTraceback, text_error_template
 
@@ -41,7 +42,8 @@ class MakoTemplates(object):
     def init_app(self, app):
         app.config.setdefault('MAKO_TEMPLATE_DIR', 'templates')
 
-    def create_lookup(self):
+    @locked_cached_property
+    def lookup(self):
         templates = self.app.config.get('MAKO_TEMPLATE_DIR')
         cache = self.app.config.get('MAKO_CACHE_DIR', None)
         cache_size = self.app.config.get('MAKO_CACHE_SIZE', -1)
@@ -51,14 +53,6 @@ class MakoTemplates(object):
         return TemplateLookup(directories=templates,
                               module_directory=cache,
                               collection_size=cache_size)
-
-    @property
-    def lookup(self):
-        ctx = stack.top
-        if ctx is not None:
-            if not hasattr(ctx, 'mako_lookup'):
-                ctx.mako_lookup = self.create_lookup()
-            return ctx.mako_lookup
 
     def render(self, template_name, **kwargs):
         """
