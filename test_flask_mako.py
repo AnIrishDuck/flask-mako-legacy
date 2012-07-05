@@ -19,27 +19,33 @@ error = """
 class MakoTemplateTest(unittest.TestCase):
     """ Tests the `flask_mako` templating extension. """
 
+    def _make_app(self):
+        app = Flask(__name__)
+        app.config.update(
+            MAKO_TEMPLATE_DIR=self.template_dir,
+            MAKO_CACHE_DIR=os.path.join(self.root, "cache"),
+            MAKO_CACHE_SIZE=10
+        )
+        return app
+
     def setUp(self):
         self.root = root = tempfile.mkdtemp()
 
-        self.template_dir = template_dir = os.path.join(root, "templates")
-        os.mkdir(template_dir)
+        self.template_dir = os.path.join(root, "templates")
 
-        self.app = app = Flask(__name__)
-        app.config.update(
-            MAKO_TEMPLATE_DIR=template_dir,
-            MAKO_CACHE_DIR=os.path.join(root, "cache"),
-            MAKO_CACHE_SIZE=10
-        )
-        self.mako = mako = MakoTemplates(app)
+        self.app = self._make_app()
+        self.mako = MakoTemplates(self.app)
 
         for name, template in (('basic', basic), ('error_template', error)):
-            with open(os.path.join(template_dir, name), 'w') as f:
-                f.write(template)
+            self._add_template(name, template)
 
-    def _add_template(self, name, text):
-        with open(os.path.join(self.template_dir, name), 'w') as f:
-            f.write(text)
+    def _add_template(self, name, text, d="templates"):
+        template_dir = os.path.join(self.root, d)
+        if not os.path.exists(template_dir):
+            os.mkdir(template_dir)
+
+        with open(os.path.join(template_dir, name), 'w') as f:
+            f.write(text.encode('utf8'))
 
     def test_encoding(self):
         """ Tests that the application properly handles Unicode. """
@@ -108,10 +114,8 @@ class MakoTemplateTest(unittest.TestCase):
 
     def test_multiple_dirs(self):
         """ Tests template loading from multiple directories. """
-        alt_d = os.path.join(self.root, 'alt_templates')
-        os.mkdir(alt_d)
-        with open(os.path.join(alt_d, 'alt'), 'w') as f:
-            f.write("${alt}")
+        self._add_template("alt", "${alt}", "alt_templates")
+        alt_d = os.path.join(self.root, "alt_templates")
 
         td = self.app.config['MAKO_TEMPLATE_DIR']
         self.app.config.update(MAKO_TEMPLATE_DIR=[alt_d, td])
