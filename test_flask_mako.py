@@ -1,4 +1,5 @@
-import os, tempfile, unittest
+import os, tempfile
+from unittest import TestCase, skipIf
 from contextlib import contextmanager
 
 import flask
@@ -7,7 +8,7 @@ from flask.ext.mako import MakoTemplates, TemplateError
 
 from mako.exceptions import CompileException
 
-class MakoTemplateTest(unittest.TestCase):
+class MakoTemplateTest(TestCase):
     """ Tests the `flask_mako` templating extension. """
 
     def setUp(self):
@@ -91,6 +92,8 @@ class MakoTemplateTest(unittest.TestCase):
 
             result = mako.render("vars")
 
+    @skipIf(not flask.signals_available,
+            "To test signals, install the blinker library")
     def test_signals(self):
         """ Tests that template rendering fires the right signal. """
         from flask.signals import template_rendered
@@ -106,10 +109,6 @@ class MakoTemplateTest(unittest.TestCase):
             result = mako.render('signal')
 
             self.assertEqual(len(log), 1)
-
-    if not flask.signals_available:
-        test_signals = unittest.skip("To test signals, install the blinker "
-                                     "library")(test_signals)
 
     def test_multiple_dirs(self):
         """ Tests template loading from multiple directories. """
