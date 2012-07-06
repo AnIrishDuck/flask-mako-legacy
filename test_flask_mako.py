@@ -137,6 +137,18 @@ class MakoTemplateTest(TestCase):
                                     MAKO_CACHE_DIR=None) as (_, _):
                 self.assertEqual(mako.render('app'), 'test 2')
 
+    def test_blueprints(self):
+        """ Tests that the plugin properly pulls templates from blueprints. """
+        self._add_template("blue", "blueprint", "blueprint_templates")
+        blue_dir = os.path.join(self.root, "blueprint_templates")
+
+        test = Blueprint('blue', __name__, template_folder=blue_dir)
+
+        with self.test_renderer() as (app, mako):
+            app.register_blueprint(test, url_prefix="blue")
+
+            self.assertEqual(mako.render("blue"), "blueprint")
+
     def test_error(self):
         """ Tests that template errors are properly handled. """
         self._add_template("error_template", """

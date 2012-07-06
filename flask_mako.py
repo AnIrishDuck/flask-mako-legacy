@@ -1,3 +1,4 @@
+import os
 from functools import wraps
 
 # Find the stack on which we want to store the database connection.
@@ -58,6 +59,13 @@ class MakoTemplates(object):
 
             templates = templates if isinstance(templates, list) \
                         else [templates]
+
+            blueprints = getattr(self.app, 'blueprints', {})
+            for name, blueprint in blueprints.iteritems():
+                if blueprint.template_folder:
+                    path = os.path.join(blueprint.root_path,
+                                        blueprint.template_folder)
+                    if os.path.isdir(path): templates.append(path)
 
             self.app.mako_lookup = TemplateLookup(directories=templates,
                                                   module_directory=cache,
