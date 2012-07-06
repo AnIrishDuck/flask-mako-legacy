@@ -56,6 +56,7 @@ class MakoTemplates(object):
             cache_size = self.app.config.get('MAKO_CACHE_SIZE', -1)
             in_encoding = self.app.config.get('MAKO_INPUT_ENCODING', 'utf-8')
             out_encoding = self.app.config.get('MAKO_OUTPUT_ENCODING', 'utf-8')
+            imports = self.app.config.get('MAKO_IMPORTS', None)
 
             templates = templates if isinstance(templates, list) \
                         else [templates]
@@ -71,6 +72,7 @@ class MakoTemplates(object):
                                                   module_directory=cache,
                                                   collection_size=cache_size,
                                                   input_encoding=in_encoding,
+                                                  imports=imports,
                                                   output_encoding=out_encoding)
         return self.app.mako_lookup
 

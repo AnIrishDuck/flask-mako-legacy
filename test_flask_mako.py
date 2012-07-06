@@ -92,6 +92,15 @@ class MakoTemplateTest(TestCase):
 
             result = mako.render("vars")
 
+    def test_imports(self):
+        """ Tests that the extension properly sets Mako imports. """
+        from string import ascii_letters
+        self._add_template("imports", "${ascii_letters}")
+
+        imports = ["from string import ascii_letters"]
+        with self.test_renderer(MAKO_IMPORTS=imports) as (_, mako):
+            self.assertEqual(mako.render("imports"), ascii_letters)
+
     @skipIf(not flask.signals_available,
             "To test signals, install the blinker library")
     def test_signals(self):
