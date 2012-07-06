@@ -1,3 +1,5 @@
+from functools import wraps
+
 # Find the stack on which we want to store the database connection.
 # Starting with Flask 0.9, the _app_ctx_stack is the correct one,
 # before that we need to use the _request_ctx_stack.
@@ -8,7 +10,6 @@ except ImportError:
 
 from flask import request, session, get_flashed_messages, url_for, g
 from flask.signals import template_rendered
-from flask.helpers import locked_cached_property
 from mako.lookup import TemplateLookup
 from mako.exceptions import RichTraceback, text_error_template
 
@@ -35,28 +36,35 @@ class MakoTemplates(object):
 
     """
     def __init__(self, app=None):
-        self.app = app
-        if self.app is not None:
+        if app:
             self.init_app(self.app)
 
     def init_app(self, app):
         app.config.setdefault('MAKO_TEMPLATE_DIR', 'templates')
 
-    @locked_cached_property
+    @property
+    def app(self):
+        return stack.top.app
+
+    @property
     def lookup(self):
-        templates = self.app.config.get('MAKO_TEMPLATE_DIR')
-        cache = self.app.config.get('MAKO_CACHE_DIR', None)
-        cache_size = self.app.config.get('MAKO_CACHE_SIZE', -1)
-        in_encoding = self.app.config.get('MAKO_INPUT_ENCODING', 'utf-8')
-        out_encoding = self.app.config.get('MAKO_OUTPUT_ENCODING', 'utf-8')
+        if not hasattr(self.app, "mako_lookup"):
 
-        templates = templates if isinstance(templates, list) else [templates]
+            templates = self.app.config.get('MAKO_TEMPLATE_DIR')
+            cache = self.app.config.get('MAKO_CACHE_DIR', None)
+            cache_size = self.app.config.get('MAKO_CACHE_SIZE', -1)
+            in_encoding = self.app.config.get('MAKO_INPUT_ENCODING', 'utf-8')
+            out_encoding = self.app.config.get('MAKO_OUTPUT_ENCODING', 'utf-8')
 
-        return TemplateLookup(directories=templates,
-                              module_directory=cache,
-                              collection_size=cache_size,
-                              input_encoding=in_encoding,
-                              output_encoding=out_encoding)
+            templates = templates if isinstance(templates, list) \
+                        else [templates]
+
+            self.app.mako_lookup = TemplateLookup(directories=templates,
+                                                  module_directory=cache,
+                                                  collection_size=cache_size,
+                                                  input_encoding=in_encoding,
+                                                  output_encoding=out_encoding)
+        return self.app.mako_lookup
 
     def render(self, template_name, **kwargs):
         """

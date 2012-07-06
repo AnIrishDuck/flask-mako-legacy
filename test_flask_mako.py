@@ -3,7 +3,7 @@ from unittest import TestCase, skipIf
 from contextlib import contextmanager
 
 import flask
-from flask import Flask
+from flask import Flask, Blueprint
 from flask.ext.mako import MakoTemplates, TemplateError
 
 from mako.exceptions import CompileException
@@ -131,11 +131,11 @@ class MakoTemplateTest(TestCase):
         alt1_dir = os.path.join(self.root, "alt1")
         alt2_dir = os.path.join(self.root, "alt2")
 
-        with self.test_renderer(MAKO_TEMPLATE_DIR=alt1_dir) as (_, mako1):
-            self.assertEqual(mako1.render('app'), 'test 1')
+        with self.test_renderer(MAKO_TEMPLATE_DIR=alt1_dir) as (_, mako):
+            self.assertEqual(mako.render('app'), 'test 1')
             with self.test_renderer(MAKO_TEMPLATE_DIR=[alt2_dir, alt1_dir],
-                                    MAKO_CACHE_DIR=None) as (_, mako2):
-                self.assertEqual(mako2.render('app'), 'test 2')
+                                    MAKO_CACHE_DIR=None) as (_, _):
+                self.assertEqual(mako.render('app'), 'test 2')
 
     def test_error(self):
         """ Tests that template errors are properly handled. """
