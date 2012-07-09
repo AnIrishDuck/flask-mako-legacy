@@ -1,3 +1,8 @@
+** NOTE: This codebase is now deprecated. I've decided to fork benselme's
+   extension and update that in the interest of maintaining a common code base.
+   See https://github.com/AnIrishDuck/flask-mako **
+
+
 A simple extension that integrates Mako template rendering into Flask
 applications. Usage::
 
